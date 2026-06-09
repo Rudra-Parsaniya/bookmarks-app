@@ -2,6 +2,11 @@
 
 import { useActionState } from 'react'
 import { createBookmark } from '@/app/dashboard/actions'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 const initialState = { error: undefined as string | undefined }
 
@@ -15,43 +20,53 @@ export function AddBookmarkForm() {
   )
 
   return (
-    <form action={formAction} className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-        Add bookmark
-      </h2>
+    <Card>
+      <CardHeader>
+        <h2 className="text-sm font-medium text-zinc-100">Add bookmark</h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          Save a new link to your collection.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form action={formAction} className="space-y-4">
+          {state.error && <Alert variant="error">{state.error}</Alert>}
 
-      {state.error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
-      )}
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              name="title"
+              type="text"
+              required
+              placeholder="Documentation, article, tool…"
+            />
+          </div>
 
-      <input
-        name="title"
-        type="text"
-        required
-        placeholder="Title"
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      />
+          <div>
+            <Label htmlFor="url">URL</Label>
+            <Input
+              id="url"
+              name="url"
+              type="url"
+              required
+              placeholder="https://example.com"
+            />
+          </div>
 
-      <input
-        name="url"
-        type="url"
-        required
-        placeholder="https://example.com"
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      />
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-zinc-400">
+            <input
+              name="is_public"
+              type="checkbox"
+              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 accent-zinc-50"
+            />
+            Visible on public profile
+          </label>
 
-      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-        <input name="is_public" type="checkbox" />
-        Public
-      </label>
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {pending ? 'Adding…' : 'Add bookmark'}
-      </button>
-    </form>
+          <Button type="submit" disabled={pending}>
+            {pending ? 'Adding…' : 'Add bookmark'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
-import { logout } from '@/app/auth/actions'
 import { AddBookmarkForm } from '@/components/bookmarks/add-bookmark-form'
 import { BookmarkList } from '@/components/bookmarks/bookmark-list'
+import { PageContainer } from '@/components/layout/page-container'
+import { StatCard } from '@/components/ui/stat-card'
 import { ensureProfile } from '@/lib/profiles'
 import { createClient } from '@/lib/supabase/server'
 
@@ -21,40 +22,46 @@ export default async function DashboardPage() {
   const { data: bookmarks } = await supabase
     .from('bookmarks')
     .select('id, user_id, title, url, is_public, created_at')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
+  const allBookmarks = bookmarks ?? []
+  const publicCount = allBookmarks.filter((b) => b.is_public).length
+  const privateCount = allBookmarks.length - publicCount
+
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-16">
-      <div className="space-y-8">
-        <div className="flex items-start justify-between gap-4">
+    <PageContainer className="py-10 sm:py-14">
+      <div className="space-y-10">
+        <section>
+          <p className="text-sm font-medium text-zinc-500">Dashboard</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">
+            Welcome back{profile?.handle ? `, @${profile.handle}` : ''}
+          </h1>
+          <p className="mt-2 text-sm text-zinc-500">
+            Manage your bookmarks and control what appears on your public profile.
+          </p>
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-3">
+          <StatCard label="Total Bookmarks" value={allBookmarks.length} />
+          <StatCard label="Public Bookmarks" value={publicCount} />
+          <StatCard label="Private Bookmarks" value={privateCount} />
+        </section>
+
+        <section className="space-y-6">
+          <AddBookmarkForm />
+
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-              Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              {profile?.handle ?? user.email}
+            <h2 className="text-sm font-medium text-zinc-300">Your bookmarks</h2>
+            <p className="mt-1 text-sm text-zinc-500">
+              Edit titles, URLs, and visibility. Changes save per bookmark.
             </p>
+            <div className="mt-5">
+              <BookmarkList bookmarks={allBookmarks} />
+            </div>
           </div>
-
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-            >
-              Log out
-            </button>
-          </form>
-        </div>
-
-        <AddBookmarkForm />
-
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-            Your bookmarks
-          </h2>
-          <BookmarkList bookmarks={bookmarks ?? []} />
         </section>
       </div>
-    </div>
+    </PageContainer>
   )
 }
